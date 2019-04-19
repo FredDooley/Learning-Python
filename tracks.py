@@ -1,12 +1,28 @@
-#import necessary libraries
+"""
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+Using Databases with Python Week 3
+Worked Example: Tracks.py
+
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+Goal (7 Steps)
+I. Read XML file
+II. Find all tracks
+III. Store track info (Artist, Album, Title) in SQL tables
+
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+"""
+
+#1 Import libraries
 import xml.etree.ElementTree as ET
 import sqlite3
 
-#create the database & db connection
+#2 Create database connection
 conn = sqlite3.connect('trackdb.sqlite')
 cur = conn.cursor()
 
-# create tables
+#3 Create tables
 cur.executescript('''
 DROP TABLE IF EXISTS Artist;
 DROP TABLE IF EXISTS Album;
@@ -32,9 +48,17 @@ CREATE TABLE Track (
 );
 ''')
 
-
+#4 Read in XML file
 fname = input('Enter file name: ')
 if ( len(fname) < 1 ) : fname = 'Library.xml'
+
+#5 Parse XML file
+stuff = ET.parse(fname)
+all = stuff.findall('dict/dict/dict')
+print('Dict count:', len(all))
+
+#6 Read XML tree
+
 
 def lookup(d, key):
     found = False
@@ -44,9 +68,6 @@ def lookup(d, key):
             found = True
     return None
 
-stuff = ET.parse(fname)
-all = stuff.findall('dict/dict/dict')
-print('Dict count:', len(all))
 for entry in all:
     if ( lookup(entry, 'Track ID') is None ) : continue
 
@@ -62,6 +83,7 @@ for entry in all:
 
     print(name, artist, album, count, rating, length)
 
+    #7 Insert XML data into SQL
     cur.execute('''INSERT OR IGNORE INTO Artist (name)
         VALUES ( ? )''', ( artist, ) )
     cur.execute('SELECT id FROM Artist WHERE name = ? ', (artist, ))
@@ -78,3 +100,15 @@ for entry in all:
         ( name, album_id, length, rating, count ) )
 
     conn.commit()
+'''
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+Steps (memorize me)
+1. Import libraries
+2. Create database connection
+3. Create tables
+4. Read in XML file
+5. Parse XML file
+6. Read XML tree
+7. Insert XML data into SQL
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+'''
